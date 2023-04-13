@@ -23,6 +23,10 @@ import com.jjoe64.graphview.GraphView;
 import com.jjoe64.graphview.series.DataPoint;
 import com.jjoe64.graphview.series.LineGraphSeries;
 
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.util.LinkedList;
 
 
@@ -75,7 +79,24 @@ public class GraphFragment extends Fragment {
         btSave.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                try {
+                    String trenner = ";";
+                    File file = new File("CA_Daten_Acc_CSV" +".csv");
 
+                    if (!file.exists()) {
+                        file.createNewFile();
+                    }
+
+                    FileWriter fw = new FileWriter(file.getAbsoluteFile());
+                    BufferedWriter bw = new BufferedWriter(fw);
+                    for (SensorNode n: aList) {
+                        bw.write(n.getData(trenner));
+                    }
+                    bw.close();
+
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
             }
         });
         //view = inflater.inflate(R.layout.fragment_blank, container,  false);

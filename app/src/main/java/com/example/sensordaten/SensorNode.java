@@ -39,4 +39,8 @@ public class SensorNode {
         return (float) Math.sqrt(x*x + y*y + z*z);
     }
 
+    public String getData(String trenner){
+        return (Math.round(Math.toDegrees(x) * 100) / 100) + trenner + (Math.round(Math.toDegrees(y) * 100) / 100) + trenner + (Math.round(Math.toDegrees(z) * 100) / 100) + trenner;
+    }
+
 }
