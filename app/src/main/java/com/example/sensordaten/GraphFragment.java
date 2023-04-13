@@ -93,6 +93,28 @@ public class GraphFragment extends Fragment {
                         bw.write(n.getData(trenner));
                     }
                     bw.close();
+                    aList.clear();
+
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+
+                try {
+                    String trenner = ";";
+                    File file = new File("CA_Daten_Gyro_CSV" +".csv");
+
+                    if (!file.exists()) {
+                        file.createNewFile();
+                    }
+
+                    FileWriter fw = new FileWriter(file.getAbsoluteFile());
+
+                    BufferedWriter bw = new BufferedWriter(fw);
+                    for (SensorNode n: gList) {
+                        bw.write(n.getData(trenner));
+                    }
+                    bw.close();
+                    gList.clear();
 
                 } catch (IOException e) {
                     e.printStackTrace();
