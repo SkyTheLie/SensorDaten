@@ -40,7 +40,13 @@ public class GraphFragment extends Fragment {
     TextView tvXG;
     TextView tvYG;
     TextView tvZG;
+    TextView tvXGName;
+    TextView tvYGName;
+    TextView tvZGName;
     TextView tvXA;
+    TextView tvXAName;
+    TextView tvYAName;
+    TextView tvZAName;
     TextView tvYA;
     TextView tvZA;
     TextView tvMinA;
@@ -127,10 +133,28 @@ public class GraphFragment extends Fragment {
         tvXG = view.findViewById(R.id.textView5);
         tvYG = view.findViewById(R.id.textView9);
         tvZG = view.findViewById(R.id.textView13);
+        tvXGName = view.findViewById(R.id.textView4);
+        tvYGName = view.findViewById(R.id.textView8);
+        tvZGName = view.findViewById(R.id.textView12);
+        tvXG.setTextColor(Color.BLUE);
+        tvXGName.setTextColor(Color.BLUE);
+        tvYG.setTextColor(Color.GREEN);
+        tvYGName.setTextColor(Color.GREEN);
+        tvZG.setTextColor(Color.RED);
+        tvZGName.setTextColor(Color.RED);
 
         tvXA = view.findViewById(R.id.textView3);
         tvYA = view.findViewById(R.id.textView7);
         tvZA = view.findViewById(R.id.textView11);
+        tvXAName = view.findViewById(R.id.textView2);
+        tvYAName = view.findViewById(R.id.textView6);
+        tvZAName = view.findViewById(R.id.textView10);
+        tvXA.setTextColor(Color.BLUE);
+        tvXAName.setTextColor(Color.BLUE);
+        tvYA.setTextColor(Color.GREEN);
+        tvYAName.setTextColor(Color.GREEN);
+        tvZA.setTextColor(Color.RED);
+        tvZAName.setTextColor(Color.RED);
 
         tvMinA = view.findViewById(R.id.textView24);
         tvMaxA = view.findViewById(R.id.textView19);
@@ -288,6 +312,8 @@ public class GraphFragment extends Fragment {
         xyWertAX.setColor(Color.BLUE);
         xyWertAY.setColor(Color.GREEN);
         xyWertAZ.setColor(Color.RED);
+
+
 
 
         graphG = view.findViewById(R.id.graphViewG);
