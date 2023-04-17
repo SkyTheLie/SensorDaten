@@ -11,6 +11,7 @@ import android.os.Bundle;
 
 import androidx.fragment.app.Fragment;
 
+import android.os.Environment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -31,7 +32,7 @@ import java.util.LinkedList;
 
 
 public class GraphFragment extends Fragment {
-
+    String pfadDownload = "//sdcard//Download//";
     SettingsKlass settingsKlass = SettingsKlass.getInstance();
 
     SensorManager sensorManager;
@@ -87,7 +88,7 @@ public class GraphFragment extends Fragment {
             public void onClick(View v) {
                 try {
                     String trenner = ";";
-                    File file = new File("/storage/emulated/Download/CA_Daten_Acc_CSV" +".csv");
+                    File file = new File(pfadDownload +"/CA_Daten_Acc_CSV" +".csv");
 
                     if (!file.exists()) {
                         file.createNewFile();
@@ -100,7 +101,8 @@ public class GraphFragment extends Fragment {
                         bw.write(n.getData(trenner));
                     }
                     bw.close();
-                    aList.clear();
+                    //initGraph(v);
+                   // aList.clear();
 
                 } catch (IOException e) {
                     e.printStackTrace();
@@ -108,7 +110,9 @@ public class GraphFragment extends Fragment {
 
                 try {
                     String trenner = ";";
-                    File file = new File("CA_Daten_Gyro_CSV" +".csv");
+                   // File f = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS);
+                    //File file = new File("CA_Daten_Gyro_CSV" +".csv");
+                    File file = new File(pfadDownload+"CA_Daten_Gyro_CSV" +".csv");
 
                     if (!file.exists()) {
                         file.createNewFile();
@@ -121,7 +125,7 @@ public class GraphFragment extends Fragment {
                         bw.write(n.getData(trenner));
                     }
                     bw.close();
-                    gList.clear();
+                    //gList.clear();
 
                 } catch (IOException e) {
                     e.printStackTrace();
