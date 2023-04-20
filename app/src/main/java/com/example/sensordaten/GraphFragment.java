@@ -12,6 +12,7 @@ import android.os.Bundle;
 import androidx.fragment.app.Fragment;
 
 import android.os.Environment;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -88,21 +89,25 @@ public class GraphFragment extends Fragment {
             public void onClick(View v) {
                 try {
                     String trenner = ";";
+                    boolean fileIsnew = false;
                     File file = new File(pfadDownload +"/CA_Daten_Acc_CSV" +".csv");
 
                     if (!file.exists()) {
                         file.createNewFile();
+                        fileIsnew = true;
                     }
 
-                    FileWriter fw = new FileWriter(file.getPath());
+                    FileWriter fw = new FileWriter(file.getPath(), true);
                     //FileWriter fw = new FileWriter("/storage/emulated/Download" + file);
                     BufferedWriter bw = new BufferedWriter(fw);
+                    if(fileIsnew){
+                        bw.write("x;y;z\n");
+                    }
                     for (SensorNode n: aList) {
                         bw.write(n.getData(trenner));
+                        Log.d("debug",n.getData(trenner) );
                     }
                     bw.close();
-                    //initGraph(v);
-                   // aList.clear();
 
                 } catch (IOException e) {
                     e.printStackTrace();
@@ -110,17 +115,22 @@ public class GraphFragment extends Fragment {
 
                 try {
                     String trenner = ";";
-                   // File f = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS);
-                    //File file = new File("CA_Daten_Gyro_CSV" +".csv");
+                    boolean fileIsnew = false;
                     File file = new File(pfadDownload+"CA_Daten_Gyro_CSV" +".csv");
 
                     if (!file.exists()) {
                         file.createNewFile();
+                        fileIsnew = true;
                     }
 
-                    FileWriter fw = new FileWriter(file.getAbsoluteFile());
+                    FileWriter fw = new FileWriter(file.getPath(), true);
+                    //FileWriter fw = new FileWriter(file.getAbsoluteFile(), true);
 
                     BufferedWriter bw = new BufferedWriter(fw);
+
+                    if(fileIsnew){
+                        bw.write("x;y;z\n");
+                    }
                     for (SensorNode n: gList) {
                         bw.write(n.getData(trenner));
                     }
@@ -230,14 +240,14 @@ public class GraphFragment extends Fragment {
                             //xyWertG.appendData(new DataPoint(gList.size(), gList.getLast().getMAG()), false, 300);
                             if(gList.size() > 300){
                                 xyWertG.appendData(new DataPoint(gList.size(), gList.getLast().getMAG()), true, 300);
-                                xyWertGX.appendData(new DataPoint(gList.size(), Math.round(Math.toDegrees(event.values[0]) * 100) / 100), true, 300);
-                                xyWertGY.appendData(new DataPoint(gList.size(), Math.round(Math.toDegrees(event.values[1]) * 100) / 100), true, 300);
-                                xyWertGZ.appendData(new DataPoint(gList.size(), Math.round(Math.toDegrees(event.values[2]) * 100) / 100), true, 300);
+                                xyWertGX.appendData(new DataPoint(gList.size(), Math.rint(Math.toDegrees(event.values[0]) * 100) / 100), true, 300);
+                                xyWertGY.appendData(new DataPoint(gList.size(), Math.rint(Math.toDegrees(event.values[1]) * 100) / 100), true, 300);
+                                xyWertGZ.appendData(new DataPoint(gList.size(), Math.rint(Math.toDegrees(event.values[2]) * 100) / 100), true, 300);
                             }else{
                                 xyWertG.appendData(new DataPoint(gList.size(), gList.getLast().getMAG()), false, 300);
-                                xyWertGX.appendData(new DataPoint(gList.size(), Math.round(Math.toDegrees(event.values[0]) * 100) / 100), false, 300);
-                                xyWertGY.appendData(new DataPoint(gList.size(), Math.round(Math.toDegrees(event.values[1]) * 100) / 100), false, 300);
-                                xyWertGZ.appendData(new DataPoint(gList.size(), Math.round(Math.toDegrees(event.values[2]) * 100) / 100), false, 300);
+                                xyWertGX.appendData(new DataPoint(gList.size(), Math.rint(Math.toDegrees(event.values[0]) * 100) / 100), false, 300);
+                                xyWertGY.appendData(new DataPoint(gList.size(), Math.rint(Math.toDegrees(event.values[1]) * 100) / 100), false, 300);
+                                xyWertGZ.appendData(new DataPoint(gList.size(), Math.rint(Math.toDegrees(event.values[2]) * 100) / 100), false, 300);
                             }
 
                             if(!gList.isEmpty()){
@@ -261,23 +271,23 @@ public class GraphFragment extends Fragment {
                             float[] out = new float[3];
                             sensorManager.getOrientation(remap, out);
 
-                            tvXG.setText(Math.round(Math.toDegrees(out[0]) * 100) / 100 + "");
-                            tvYG.setText(Math.round(Math.toDegrees(out[1]) * 100) / 100 + "");
-                            tvZG.setText(Math.round(Math.toDegrees(out[2]) * 100) / 100 + "");
+                            tvXG.setText(Math.rint(Math.toDegrees(out[0]) * 100) / 100 + "");
+                            tvYG.setText(Math.rint(Math.toDegrees(out[1]) * 100) / 100 + "");
+                            tvZG.setText(Math.rint(Math.toDegrees(out[2]) * 100) / 100 + "");
 
                             gList.add(new SensorNode((float)(Math.round(Math.toDegrees(out[0]) * 100) / 100), (float)(Math.round(Math.toDegrees(out[1]) * 100) / 100), (float)(Math.round(Math.toDegrees(out[2]) * 100) / 100)));
 
                             if(gList.size() > 300){
                                 xyWertG.appendData(new DataPoint(gList.size(), gList.getLast().getMAG()), true, 300);
-                                xyWertGX.appendData(new DataPoint(gList.size(), Math.round(Math.toDegrees(out[0]) * 100) / 100), true, 300);
-                                xyWertGY.appendData(new DataPoint(gList.size(), Math.round(Math.toDegrees(out[1]) * 100) / 100), true, 300);
-                                xyWertGZ.appendData(new DataPoint(gList.size(), Math.round(Math.toDegrees(out[2]) * 100) / 100), true, 300);
+                                xyWertGX.appendData(new DataPoint(gList.size(), Math.rint(Math.toDegrees(out[0]) * 100) / 100), true, 300);
+                                xyWertGY.appendData(new DataPoint(gList.size(), Math.rint(Math.toDegrees(out[1]) * 100) / 100), true, 300);
+                                xyWertGZ.appendData(new DataPoint(gList.size(), Math.rint(Math.toDegrees(out[2]) * 100) / 100), true, 300);
 
                             }else{
                                 xyWertG.appendData(new DataPoint(gList.size(), gList.getLast().getMAG()), false, 300);
-                                xyWertGX.appendData(new DataPoint(gList.size(), Math.round(Math.toDegrees(out[0]) * 100) / 100), false, 300);
-                                xyWertGY.appendData(new DataPoint(gList.size(), Math.round(Math.toDegrees(out[1]) * 100) / 100), false, 300);
-                                xyWertGZ.appendData(new DataPoint(gList.size(), Math.round(Math.toDegrees(out[2]) * 100) / 100), false, 300);
+                                xyWertGX.appendData(new DataPoint(gList.size(), Math.rint(Math.toDegrees(out[0]) * 100) / 100), false, 300);
+                                xyWertGY.appendData(new DataPoint(gList.size(), Math.rint(Math.toDegrees(out[1]) * 100) / 100), false, 300);
+                                xyWertGZ.appendData(new DataPoint(gList.size(), Math.rint(Math.toDegrees(out[2]) * 100) / 100), false, 300);
 
                             }
                         }

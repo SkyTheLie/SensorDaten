@@ -40,7 +40,7 @@ public class SensorNode {
     }
 
     public String getData(String trenner){
-        return (Math.round(Math.toDegrees(x) * 100) / 100) + trenner + (Math.round(Math.toDegrees(y) * 100) / 100) + trenner + (Math.round(Math.toDegrees(z) * 100) / 100) + trenner;
+        return (Math.rint(x * 100) / 100) + trenner + (Math.rint(y * 100) / 100) + trenner + (Math.rint(z * 100) / 100) + "\n";
     }
 
 }
