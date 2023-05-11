@@ -11,8 +11,6 @@ import android.os.Bundle;
 
 import androidx.fragment.app.Fragment;
 
-import android.os.Environment;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -29,13 +27,17 @@ import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.LinkedList;
+import java.util.Locale;
 
 
 public class GraphFragment extends Fragment {
     String pfadDownload = "//sdcard//Download//";
     SettingsKlass settingsKlass = SettingsKlass.getInstance();
-
+    SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd:HH-mm-ss-SSS", Locale.getDefault());
+    String currentDateandTime;
     SensorManager sensorManager;
     SensorEventListener sensorEventListener;
     Switch sswitch;
@@ -87,6 +89,9 @@ public class GraphFragment extends Fragment {
         btSave.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+               // SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd:HH-mm-ss-SSS", Locale.getDefault());
+               // String currentDateandTime = sdf.format(new Date());
+
                 try {
                     String trenner = ";";
                     boolean fileIsnew = false;
@@ -101,11 +106,11 @@ public class GraphFragment extends Fragment {
                     //FileWriter fw = new FileWriter("/storage/emulated/Download" + file);
                     BufferedWriter bw = new BufferedWriter(fw);
                     if(fileIsnew){
-                        bw.write("x;y;z\n");
+                        bw.write("x;y;z;yyyy-MM-dd:HH-mm-ss-SSS\n");
                     }
                     for (SensorNode n: aList) {
-                        bw.write(n.getData(trenner));
-                        Log.d("debug",n.getData(trenner) );
+                        bw.write(n.getData(trenner) + ";" + "\n");
+                        //Log.d("debug",n.getData(trenner) );
                     }
                     bw.close();
 
@@ -129,10 +134,10 @@ public class GraphFragment extends Fragment {
                     BufferedWriter bw = new BufferedWriter(fw);
 
                     if(fileIsnew){
-                        bw.write("x;y;z\n");
+                        bw.write("x;y;z;yyyy-MM-dd:HH-mm-ss-SSS\n");
                     }
                     for (SensorNode n: gList) {
-                        bw.write(n.getData(trenner));
+                        bw.write(n.getData(trenner) + ";" + "\n");
                     }
                     bw.close();
                     //gList.clear();
@@ -206,8 +211,8 @@ public class GraphFragment extends Fragment {
                         tvYA.setText(event.values[1] + "");
                         tvZA.setText(event.values[2] + "");
 
-
-                        aList.add(new SensorNode(event.values[0], event.values[1], event.values[2]));
+                        currentDateandTime = sdf.format(new Date());
+                        aList.add(new SensorNode(event.values[0], event.values[1], event.values[2], currentDateandTime));
 
                         if(aList.size() > 1000){
                             xyWertA.appendData(new DataPoint(aList.size(), aList.getLast().getMAG()), true, 1000);
@@ -235,7 +240,8 @@ public class GraphFragment extends Fragment {
                             tvYG.setText((event.values[1]) + "");
                             tvZG.setText((event.values[2]) + "");
 
-                            gList.add(new SensorNode(event.values[0], event.values[1], event.values[2]));
+                            currentDateandTime = sdf.format(new Date());
+                            gList.add(new SensorNode(event.values[0], event.values[1], event.values[2], currentDateandTime));
 
                             //xyWertG.appendData(new DataPoint(gList.size(), gList.getLast().getMAG()), false, 300);
                             if(gList.size() > 300){
@@ -275,7 +281,8 @@ public class GraphFragment extends Fragment {
                             tvYG.setText(Math.rint(Math.toDegrees(out[1]) * 100) / 100 + "");
                             tvZG.setText(Math.rint(Math.toDegrees(out[2]) * 100) / 100 + "");
 
-                            gList.add(new SensorNode((float)(Math.round(Math.toDegrees(out[0]) * 100) / 100), (float)(Math.round(Math.toDegrees(out[1]) * 100) / 100), (float)(Math.round(Math.toDegrees(out[2]) * 100) / 100)));
+                            currentDateandTime = sdf.format(new Date());
+                            gList.add(new SensorNode((float)(Math.round(Math.toDegrees(out[0]) * 100) / 100), (float)(Math.round(Math.toDegrees(out[1]) * 100) / 100), (float)(Math.round(Math.toDegrees(out[2]) * 100) / 100), currentDateandTime));
 
                             if(gList.size() > 300){
                                 xyWertG.appendData(new DataPoint(gList.size(), gList.getLast().getMAG()), true, 300);
