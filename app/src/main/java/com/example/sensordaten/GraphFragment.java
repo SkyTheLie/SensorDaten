@@ -104,6 +104,22 @@ public class GraphFragment extends Fragment {
                 Log.d("debug",pathdownload.toString() );
 
                 String trenner = ",";
+                String klasstype = "";
+                switch (settingsKlass.getKlassenType()){
+                    case 0:{
+                        klasstype = "U";
+                    }break;
+                    case 1:{
+                        klasstype = "S";
+                    }break;
+                    case 2:{
+                        klasstype = "L";
+                    }break;
+                    case 3:{
+                        klasstype = "R";
+                    }break;
+                }
+
                 try {
                     boolean fileIsnew = false;
                     //pfadDownload = (requireContext().getExternalFilesDir(Environment.DIRECTORY_DOWNLOADS)).getPath();
@@ -124,10 +140,10 @@ public class GraphFragment extends Fragment {
                     if(fileIsnew){
                        // bw.write("x;y;z;yyyy-MM-dd:HH-mm-ss-SSS\n");
                         //bw.write("x;y;z;yyyy-MM-dd:HH:mm:ss\n");
-                        bw.write("id" + trenner + "x" + trenner + "y" + trenner + "z" + "\n");
+                        bw.write("id" + trenner + "x" + trenner + "y" + trenner + "z" + trenner + "mag" + trenner + "klasstype" +"\n");
                     }
                     for (SensorNode n: aList) {
-                        bw.write(n.getDate() + trenner + n.getData(trenner) + "\n");
+                        bw.write(n.getDate() + trenner + n.getData(trenner) + trenner + n.getMAG() + trenner + n.getKlassenType() +"\n");
                     }
                     bw.close();
 
@@ -153,11 +169,10 @@ public class GraphFragment extends Fragment {
                     if(fileIsnew){
                        // bw.write("x;y;z;yyyy-MM-dd:HH-mm-ss-SSS\n");
                         //bw.write("x;y;z;yyyy-MM-dd:HH:mm:ss\n");
-                        bw.write("id" + trenner + "x" + trenner + "y" + trenner + "z" + "\n");
+                        bw.write("id" + trenner + "x" + trenner + "y" + trenner + "z" + trenner + "mag" + trenner + "klasstype" +"\n");
                     }
                     for (SensorNode n: gList) {
-                        bw.write(n.getDate() + trenner + n.getData(trenner) + "\n");
-
+                        bw.write(n.getDate() + trenner + n.getData(trenner) + trenner + n.getMAG() + trenner + n.getKlassenType() +"\n");
                     }
                     bw.close();
                     //gList.clear();
@@ -184,11 +199,11 @@ public class GraphFragment extends Fragment {
                     //FileWriter fw = new FileWriter("/storage/emulated/Download" + file);
                     BufferedWriter bw = new BufferedWriter(fw);
                     if(fileIsnew){
-                        bw.write("id" + trenner + "xa" + trenner + "ya" + trenner + "za" + trenner + "xg" + trenner + "yg" + trenner + "zg" + "\n");
+                        bw.write("id" + trenner + "xa" + trenner + "ya" + trenner + "za" + trenner + "aMag" + trenner + "xg" + trenner + "yg" + trenner + "zg" + trenner + "gMag" + trenner + "klasstype" + "\n");
                     }
                     for(int i = 0; i < aList.size() && i < gList.size(); i++){
                         //Log.d("debug",i + "   " + aList.size() + "   " + gList.size());
-                        bw.write(aList.get(i).getDate() + trenner + aList.get(i).getData(trenner) + "," + gList.get(i).getData(trenner) + "\n");
+                        bw.write(aList.get(i).getDate() + trenner + aList.get(i).getData(trenner) + trenner +aList.get(i).getMAG() + trenner + gList.get(i).getData(trenner) + trenner + gList.get(i).getMAG() + trenner + gList.get(i).getKlassenType() + "\n");
                     }
                     bw.close();
 
@@ -255,6 +270,23 @@ public class GraphFragment extends Fragment {
         sensorEventListener = new SensorEventListener() {
             @Override
             public void onSensorChanged(SensorEvent event) {
+
+                String klasstype = "";
+                switch (settingsKlass.getKlassenType()){
+                    case 0:{
+                        klasstype = "U";
+                    }break;
+                    case 1:{
+                        klasstype = "S";
+                    }break;
+                    case 2:{
+                        klasstype = "L";
+                    }break;
+                    case 3:{
+                        klasstype = "R";
+                    }break;
+                }
+
                 switch (event.sensor.getType()){
                     case Sensor.TYPE_ACCELEROMETER:{
                         tvXA.setText(event.values[0] + "");
@@ -263,7 +295,7 @@ public class GraphFragment extends Fragment {
 
                         //currentDateandTime = sdf.format(new Date());
                         //aList.add(new SensorNode(event.values[0], event.values[1], event.values[2], currentDateandTime));
-                        aList.add(new SensorNode(event.values[0], event.values[1], event.values[2], System.currentTimeMillis()));
+                        aList.add(new SensorNode(event.values[0], event.values[1], event.values[2], System.currentTimeMillis(), klasstype));
 
                         if(aList.size() > 1000){
                             xyWertA.appendData(new DataPoint(aList.size(), aList.getLast().getMAG()), true, 1000);
@@ -293,7 +325,7 @@ public class GraphFragment extends Fragment {
 
                             //currentDateandTime = sdf.format(new Date());
                             //gList.add(new SensorNode(event.values[0], event.values[1], event.values[2], currentDateandTime));
-                            gList.add(new SensorNode(event.values[0], event.values[1], event.values[2], System.currentTimeMillis()));
+                            gList.add(new SensorNode(event.values[0], event.values[1], event.values[2], System.currentTimeMillis(), klasstype));
 
                             //xyWertG.appendData(new DataPoint(gList.size(), gList.getLast().getMAG()), false, 300);
                             if(gList.size() > 300){
@@ -335,7 +367,7 @@ public class GraphFragment extends Fragment {
 
                             //currentDateandTime = sdf.format(new Date());
                             //gList.add(new SensorNode((float)Math.toDegrees(out[0]), (float)Math.toDegrees(out[1]), (float)Math.toDegrees(out[2]), currentDateandTime));
-                            gList.add(new SensorNode((float)Math.toDegrees(out[0]), (float)Math.toDegrees(out[1]), (float)Math.toDegrees(out[2]), System.currentTimeMillis()));
+                            gList.add(new SensorNode((float)Math.toDegrees(out[0]), (float)Math.toDegrees(out[1]), (float)Math.toDegrees(out[2]), System.currentTimeMillis(), klasstype));
 
                             if(gList.size() > 300){
                                 xyWertG.appendData(new DataPoint(gList.size(), gList.getLast().getMAG()), true, 300);

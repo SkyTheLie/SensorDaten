@@ -5,12 +5,20 @@ public class SensorNode {
     private float y;
     private float z;
     private long date;
+    String klassenType;
 
     SensorNode(float x, float y, float z, long currentDate){
         this.x = x;
         this.y= y;
         this.z = z;
         this.date = currentDate;
+    }
+    SensorNode(float x, float y, float z, long currentDate, String klassenType){
+        this.x = x;
+        this.y= y;
+        this.z = z;
+        this.date = currentDate;
+        this.klassenType = klassenType;
     }
     SensorNode(float x, float y, float z){
         this.x = x;
@@ -55,5 +63,9 @@ public class SensorNode {
 
     public long getDate(){
         return this.date;
+    }
+
+    public String getKlassenType(){
+        return this.klassenType;
     }
 }
