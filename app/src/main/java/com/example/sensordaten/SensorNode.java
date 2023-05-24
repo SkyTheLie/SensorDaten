@@ -42,7 +42,7 @@ public class SensorNode {
     }
 
     public String getData(String trenner){
-        return (Math.rint(x * 100) / 100) + trenner + (Math.rint(y * 100) / 100) + trenner + (Math.rint(z * 100) / 100) + date;
+        return x + trenner + y + trenner + z + trenner + date;
     }
 
 }

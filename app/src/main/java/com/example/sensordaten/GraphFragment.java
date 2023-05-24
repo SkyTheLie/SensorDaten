@@ -282,7 +282,7 @@ public class GraphFragment extends Fragment {
                             tvZG.setText(Math.rint(Math.toDegrees(out[2]) * 100) / 100 + "");
 
                             currentDateandTime = sdf.format(new Date());
-                            gList.add(new SensorNode((float)(Math.round(Math.toDegrees(out[0]) * 100) / 100), (float)(Math.round(Math.toDegrees(out[1]) * 100) / 100), (float)(Math.round(Math.toDegrees(out[2]) * 100) / 100), currentDateandTime));
+                            gList.add(new SensorNode((float)Math.toDegrees(out[0]), (float)Math.toDegrees(out[1]), (float)Math.toDegrees(out[2]), currentDateandTime));
 
                             if(gList.size() > 300){
                                 xyWertG.appendData(new DataPoint(gList.size(), gList.getLast().getMAG()), true, 300);
