@@ -5,6 +5,7 @@ import android.app.Application;
 public class SettingsKlass extends Application {
     private static SettingsKlass sInstance  = null;
 
+    private int klassenType = 0;
     private boolean switchRG = false;
     private int speedAcc = 3;
     private int speedGyro = 3;
@@ -54,5 +55,13 @@ public class SettingsKlass extends Application {
     }
     public int getSpeedAcc() {
         return this.speedAcc;
+    }
+
+    public void setKlassenType(int kt){
+        this.klassenType = kt;
+    }
+
+    public int getKlassenType(){
+        return this.klassenType;
     }
 }

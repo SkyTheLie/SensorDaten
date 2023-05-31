@@ -24,12 +24,14 @@ public class SettingsFragment extends Fragment {
     Switch sRG;
     Spinner spAcc;
     Spinner spGyro;
+    Spinner spKlass;
 
     public void onViewCreated(View view, Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
         spAcc = view.findViewById(R.id.spAcc);
         spGyro = view.findViewById(R.id.spGyro);
+        spKlass = view.findViewById(R.id.spKlasse);
 
         ArrayList<String> items = new ArrayList<>();
         items.add("FASTEST");
@@ -48,6 +50,16 @@ public class SettingsFragment extends Fragment {
         spAcc.setAdapter(adapter);
         spGyro.setAdapter(adapter);
 
+        ArrayList<String> itemsKlass = new ArrayList<>();
+        itemsKlass.add("U");
+        itemsKlass.add("S");
+        itemsKlass.add("L");
+        itemsKlass.add("R");
+
+        ArrayAdapter<String> adapterKlass = new ArrayAdapter<String>(view.getContext(), android.R.layout.simple_spinner_item, itemsKlass);
+        adapterKlass.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        spKlass.setAdapter(adapterKlass);
+
         spAcc.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
@@ -62,17 +74,29 @@ public class SettingsFragment extends Fragment {
         spGyro.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                settingsKlass.setSpeedAcc(position);
+                settingsKlass.setSpeedGyro(position);
             }
 
             @Override
             public void onNothingSelected(AdapterView<?> parent) {
-                settingsKlass.setSpeedAcc(3);
+                settingsKlass.setSpeedGyro(3);
+            }
+        });
+        spKlass.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                settingsKlass.setKlassenType(position);
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) {
+                settingsKlass.setKlassenType(0);
             }
         });
 
         spGyro.setSelection(3);
         spAcc.setSelection(3);
+        spKlass.setSelection(0);
 
         sRG = view.findViewById(R.id.sRG);
         sRG.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {

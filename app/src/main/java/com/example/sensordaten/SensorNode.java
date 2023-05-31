@@ -4,13 +4,18 @@ public class SensorNode {
     private float x;
     private float y;
     private float z;
-    private String date;
+    private long date;
 
-    SensorNode(float x, float y, float z, String currentDateandTime){
+    SensorNode(float x, float y, float z, long currentDate){
         this.x = x;
         this.y= y;
         this.z = z;
-        this.date = currentDateandTime;
+        this.date = currentDate;
+    }
+    SensorNode(float x, float y, float z){
+        this.x = x;
+        this.y= y;
+        this.z = z;
     }
 
     public float getX() {
@@ -41,8 +46,14 @@ public class SensorNode {
         return (float) Math.sqrt(x*x + y*y + z*z);
     }
 
+    public String getDataWDate(String trenner){
+        return x + trenner + y + trenner + z + trenner + date;
+    }
     public String getData(String trenner){
-        return (Math.rint(x * 100) / 100) + trenner + (Math.rint(y * 100) / 100) + trenner + (Math.rint(z * 100) / 100) + date;
+        return x + trenner + y + trenner + z ;
     }
 
+    public long getDate(){
+        return this.date;
+    }
 }

@@ -11,6 +11,8 @@ import android.os.Bundle;
 
 import androidx.fragment.app.Fragment;
 
+import android.os.Environment;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -36,8 +38,9 @@ import java.util.Locale;
 public class GraphFragment extends Fragment {
     String pfadDownload = "//sdcard//Download//";
     SettingsKlass settingsKlass = SettingsKlass.getInstance();
-    SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd:HH-mm-ss-SSS", Locale.getDefault());
-    String currentDateandTime;
+    //SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd:HH-mm-ss-SSS", Locale.getDefault());
+    //SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd:HH:mm:ss", Locale.getDefault());
+    //String currentDateandTime;
     SensorManager sensorManager;
     SensorEventListener sensorEventListener;
     Switch sswitch;
@@ -89,13 +92,26 @@ public class GraphFragment extends Fragment {
         btSave.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+
                // SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd:HH-mm-ss-SSS", Locale.getDefault());
                // String currentDateandTime = sdf.format(new Date());
+                //pfadDownload = (requireContext().getExternalFilesDir(Environment.DIRECTORY_DOWNLOADS)).getPath();
+                //pfadDownload = (Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS)).getPath();
+                File pathdownload = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS);
+                //pathdownload = new File(pathdownload, "SubDir");
+                //pathdownload.mkdir();
 
+                Log.d("debug",pathdownload.toString() );
+
+                String trenner = ",";
                 try {
-                    String trenner = ";";
                     boolean fileIsnew = false;
-                    File file = new File(pfadDownload +"/CA_Daten_Acc_CSV" +".csv");
+                    //pfadDownload = (requireContext().getExternalFilesDir(Environment.DIRECTORY_DOWNLOADS)).getPath();
+                    //Log.d("debug",pfadDownload);
+
+
+                    //File file = new File(pfadDownload +"CA_Daten_Acc_CSV" +".csv");
+                    File file = new File(pathdownload, "CA_Daten_Acc_CSV" +".txt");
 
                     if (!file.exists()) {
                         file.createNewFile();
@@ -106,11 +122,12 @@ public class GraphFragment extends Fragment {
                     //FileWriter fw = new FileWriter("/storage/emulated/Download" + file);
                     BufferedWriter bw = new BufferedWriter(fw);
                     if(fileIsnew){
-                        bw.write("x;y;z;yyyy-MM-dd:HH-mm-ss-SSS\n");
+                       // bw.write("x;y;z;yyyy-MM-dd:HH-mm-ss-SSS\n");
+                        //bw.write("x;y;z;yyyy-MM-dd:HH:mm:ss\n");
+                        bw.write("id" + trenner + "x" + trenner + "y" + trenner + "z" + "\n");
                     }
                     for (SensorNode n: aList) {
-                        bw.write(n.getData(trenner) + ";" + "\n");
-                        //Log.d("debug",n.getData(trenner) );
+                        bw.write(n.getDate() + trenner + n.getData(trenner) + "\n");
                     }
                     bw.close();
 
@@ -119,9 +136,9 @@ public class GraphFragment extends Fragment {
                 }
 
                 try {
-                    String trenner = ";";
                     boolean fileIsnew = false;
-                    File file = new File(pfadDownload+"CA_Daten_Gyro_CSV" +".csv");
+                    //File file = new File(pfadDownload+"CA_Daten_Gyro_CSV" +".csv");
+                    File file = new File(pathdownload, "CA_Daten_Gyro_CSV" +".txt");
 
                     if (!file.exists()) {
                         file.createNewFile();
@@ -134,13 +151,46 @@ public class GraphFragment extends Fragment {
                     BufferedWriter bw = new BufferedWriter(fw);
 
                     if(fileIsnew){
-                        bw.write("x;y;z;yyyy-MM-dd:HH-mm-ss-SSS\n");
+                       // bw.write("x;y;z;yyyy-MM-dd:HH-mm-ss-SSS\n");
+                        //bw.write("x;y;z;yyyy-MM-dd:HH:mm:ss\n");
+                        bw.write("id" + trenner + "x" + trenner + "y" + trenner + "z" + "\n");
                     }
                     for (SensorNode n: gList) {
-                        bw.write(n.getData(trenner) + ";" + "\n");
+                        bw.write(n.getDate() + trenner + n.getData(trenner) + "\n");
+
                     }
                     bw.close();
                     //gList.clear();
+
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+
+                try {
+                    boolean fileIsnew = false;
+                    //pfadDownload = (requireContext().getExternalFilesDir(Environment.DIRECTORY_DOWNLOADS)).getPath();
+                    //Log.d("debug",pfadDownload);
+
+
+                    //File file = new File(pfadDownload +"CA_Daten_Acc_CSV" +".csv");
+                    File file = new File(pathdownload, "CA_Daten_Acc+gyro_CSV" +".txt");
+
+                    if (!file.exists()) {
+                        file.createNewFile();
+                        fileIsnew = true;
+                    }
+
+                    FileWriter fw = new FileWriter(file.getPath(), true);
+                    //FileWriter fw = new FileWriter("/storage/emulated/Download" + file);
+                    BufferedWriter bw = new BufferedWriter(fw);
+                    if(fileIsnew){
+                        bw.write("id" + trenner + "xa" + trenner + "ya" + trenner + "za" + trenner + "xg" + trenner + "yg" + trenner + "zg" + "\n");
+                    }
+                    for(int i = 0; i < aList.size() && i < gList.size(); i++){
+                        //Log.d("debug",i + "   " + aList.size() + "   " + gList.size());
+                        bw.write(aList.get(i).getDate() + trenner + aList.get(i).getData(trenner) + "," + gList.get(i).getData(trenner) + "\n");
+                    }
+                    bw.close();
 
                 } catch (IOException e) {
                     e.printStackTrace();
@@ -211,8 +261,9 @@ public class GraphFragment extends Fragment {
                         tvYA.setText(event.values[1] + "");
                         tvZA.setText(event.values[2] + "");
 
-                        currentDateandTime = sdf.format(new Date());
-                        aList.add(new SensorNode(event.values[0], event.values[1], event.values[2], currentDateandTime));
+                        //currentDateandTime = sdf.format(new Date());
+                        //aList.add(new SensorNode(event.values[0], event.values[1], event.values[2], currentDateandTime));
+                        aList.add(new SensorNode(event.values[0], event.values[1], event.values[2], System.currentTimeMillis()));
 
                         if(aList.size() > 1000){
                             xyWertA.appendData(new DataPoint(aList.size(), aList.getLast().getMAG()), true, 1000);
@@ -240,8 +291,9 @@ public class GraphFragment extends Fragment {
                             tvYG.setText((event.values[1]) + "");
                             tvZG.setText((event.values[2]) + "");
 
-                            currentDateandTime = sdf.format(new Date());
-                            gList.add(new SensorNode(event.values[0], event.values[1], event.values[2], currentDateandTime));
+                            //currentDateandTime = sdf.format(new Date());
+                            //gList.add(new SensorNode(event.values[0], event.values[1], event.values[2], currentDateandTime));
+                            gList.add(new SensorNode(event.values[0], event.values[1], event.values[2], System.currentTimeMillis()));
 
                             //xyWertG.appendData(new DataPoint(gList.size(), gList.getLast().getMAG()), false, 300);
                             if(gList.size() > 300){
@@ -281,8 +333,9 @@ public class GraphFragment extends Fragment {
                             tvYG.setText(Math.rint(Math.toDegrees(out[1]) * 100) / 100 + "");
                             tvZG.setText(Math.rint(Math.toDegrees(out[2]) * 100) / 100 + "");
 
-                            currentDateandTime = sdf.format(new Date());
-                            gList.add(new SensorNode((float)(Math.round(Math.toDegrees(out[0]) * 100) / 100), (float)(Math.round(Math.toDegrees(out[1]) * 100) / 100), (float)(Math.round(Math.toDegrees(out[2]) * 100) / 100), currentDateandTime));
+                            //currentDateandTime = sdf.format(new Date());
+                            //gList.add(new SensorNode((float)Math.toDegrees(out[0]), (float)Math.toDegrees(out[1]), (float)Math.toDegrees(out[2]), currentDateandTime));
+                            gList.add(new SensorNode((float)Math.toDegrees(out[0]), (float)Math.toDegrees(out[1]), (float)Math.toDegrees(out[2]), System.currentTimeMillis()));
 
                             if(gList.size() > 300){
                                 xyWertG.appendData(new DataPoint(gList.size(), gList.getLast().getMAG()), true, 300);
