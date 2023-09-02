@@ -15,19 +15,22 @@ public class ViewAdapterJ extends FragmentStateAdapter {
     public Fragment createFragment(int position) {
         switch (position){
             case 0:
-                return new GraphFragment();
+                return new HealthFragment();
 
             case 1:
+                return new GraphFragment();
+
+            case 2:
                 return new SettingsFragment();
 
             default:
-               return new GraphFragment();
+               return new HealthFragment();
 
         }
     }
 
     @Override
     public int getItemCount() {
-        return 2;
+        return 3;
     }
 }

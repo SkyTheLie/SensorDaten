@@ -2,6 +2,8 @@ package com.example.sensordaten;
 
 import static android.content.Context.SENSOR_SERVICE;
 
+import android.content.Context;
+import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
@@ -38,6 +40,7 @@ import java.util.Locale;
 public class GraphFragment extends Fragment {
     String pfadDownload = "//sdcard//Download//";
     SettingsKlass settingsKlass = SettingsKlass.getInstance();
+    SharedPreferences sharedPreferences;
     //SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd:HH-mm-ss-SSS", Locale.getDefault());
     //SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd:HH:mm:ss", Locale.getDefault());
     //String currentDateandTime;
@@ -69,6 +72,10 @@ public class GraphFragment extends Fragment {
     LinkedList<SensorNode> aList;
     float aD;
 
+    LinkedList<Float> gListAvg;
+    int countGListAvg = 0;
+    float[] avgHelper = new float[5];
+
     GraphView graphA;
     GraphView graphG;
 
@@ -87,6 +94,8 @@ public class GraphFragment extends Fragment {
         super.onViewCreated(view, savedInstanceState);
 
         settingsKlass = SettingsKlass.getInstance();
+        sharedPreferences = getContext().getSharedPreferences("SettingsHealthApp", Context.MODE_PRIVATE);
+
 
         btSave = view.findViewById(R.id.btSave);
         btSave.setOnClickListener(new View.OnClickListener() {
@@ -210,6 +219,44 @@ public class GraphFragment extends Fragment {
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
+
+                try{
+                    boolean fileIsnew = false;
+                    File file = new File(pathdownload, "gMag_List" +".txt");
+
+                    if (!file.exists()) {
+                        file.createNewFile();
+                        fileIsnew = true;
+                    }
+
+                    FileWriter fw = new FileWriter(file.getPath(), true);
+                    //FileWriter fw = new FileWriter("/storage/emulated/Download" + file);
+                    BufferedWriter bw = new BufferedWriter(fw);
+
+                    if(fileIsnew){
+                        bw.write("id" + trenner + "gMag" + trenner + "klasenType");
+                    }
+
+
+                    int count = 0;
+                    int countId = 1;
+                    float helper = 0;
+                    for(SensorNode s: gList){
+                        if (count == 5){
+                            helper = helper / 5;
+                            bw.write(countId + trenner + helper + trenner + sharedPreferences.getString("KlasseSetting", "0") + "\n");
+                            count = 0;
+                            countId++;
+                        }
+                        helper += s.getMAG();
+                        count++;
+                    }
+
+                    bw.close();
+
+                }catch (IOException e) {
+                    e.printStackTrace();
+                }
             }
         });
         //view = inflater.inflate(R.layout.fragment_blank, container,  false);
@@ -326,6 +373,19 @@ public class GraphFragment extends Fragment {
                             //currentDateandTime = sdf.format(new Date());
                             //gList.add(new SensorNode(event.values[0], event.values[1], event.values[2], currentDateandTime));
                             gList.add(new SensorNode(event.values[0], event.values[1], event.values[2], System.currentTimeMillis(), klasstype));
+
+                            /*
+                            avgHelper[countGListAvg] = (float) Math.sqrt((event.values[0])*(event.values[0]) + (event.values[1])*(event.values[1]) + (event.values[2])*(event.values[2]));
+                            countGListAvg++;
+
+                            if(countGListAvg == 5){
+                                float helper = 0;
+                                for (float f: avgHelper ){
+                                    helper +=f;
+                                }
+                                gListAvg.add(helper/5);
+                            }
+*/
 
                             //xyWertG.appendData(new DataPoint(gList.size(), gList.getLast().getMAG()), false, 300);
                             if(gList.size() > 300){

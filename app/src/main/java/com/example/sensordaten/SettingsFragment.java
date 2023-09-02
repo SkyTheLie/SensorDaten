@@ -1,5 +1,7 @@
 package com.example.sensordaten;
 
+import android.content.Context;
+import android.content.SharedPreferences;
 import android.hardware.Sensor;
 import android.hardware.SensorManager;
 import android.os.Bundle;
@@ -26,8 +28,12 @@ public class SettingsFragment extends Fragment {
     Spinner spGyro;
     Spinner spKlass;
 
+    SharedPreferences sharedPreferences;
+
     public void onViewCreated(View view, Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
+
+        sharedPreferences = getContext().getSharedPreferences("SettingsHealthApp", Context.MODE_PRIVATE);
 
         spAcc = view.findViewById(R.id.spAcc);
         spGyro = view.findViewById(R.id.spGyro);
@@ -63,7 +69,9 @@ public class SettingsFragment extends Fragment {
         spAcc.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                settingsKlass.setSpeedAcc(position);
+                SharedPreferences.Editor editor = sharedPreferences.edit();
+                editor.putString("AccSetting", position + "");
+                editor.apply();
             }
 
             @Override
@@ -74,29 +82,35 @@ public class SettingsFragment extends Fragment {
         spGyro.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                settingsKlass.setSpeedGyro(position);
+                SharedPreferences.Editor editor = sharedPreferences.edit();
+                editor.putString("GyroSetting", position + "");
+                editor.apply();
             }
 
             @Override
             public void onNothingSelected(AdapterView<?> parent) {
-                settingsKlass.setSpeedGyro(3);
+
             }
         });
         spKlass.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                settingsKlass.setKlassenType(position);
+                SharedPreferences.Editor editor = sharedPreferences.edit();
+                editor.putString("KlasseSetting", position + "");
+                editor.apply();
             }
 
             @Override
             public void onNothingSelected(AdapterView<?> parent) {
-                settingsKlass.setKlassenType(0);
+
             }
+
         });
 
-        spGyro.setSelection(3);
-        spAcc.setSelection(3);
-        spKlass.setSelection(0);
+
+        spGyro.setSelection(Integer.parseInt(sharedPreferences.getString("GyroSetting", "3")));
+        spAcc.setSelection(Integer.parseInt(sharedPreferences.getString("AccSetting", "3")));
+        spKlass.setSelection(Integer.parseInt(sharedPreferences.getString("KlasseSetting", "0")));
 
         sRG = view.findViewById(R.id.sRG);
         sRG.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
