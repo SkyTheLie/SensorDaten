@@ -234,24 +234,33 @@ public class GraphFragment extends Fragment {
                     BufferedWriter bw = new BufferedWriter(fw);
 
                     if(fileIsnew){
-                        bw.write("id" + trenner + "gMag" + trenner + "klasenType");
+                        bw.write("id" + trenner + "date" + trenner + "gMag" + trenner + "klasenType");
                     }
 
+                    sharedPreferences = getContext().getSharedPreferences("SettingsHealthApp", Context.MODE_PRIVATE);
+                    long datehelper = 0;
 
                     int count = 0;
-                    int countId = 1;
+                    int countId = Integer.parseInt(sharedPreferences.getString("countId", "0"));
+
                     float helper = 0;
                     for(SensorNode s: gList){
                         if (count == 5){
                             helper = helper / 5;
-                            bw.write(countId + trenner + helper + trenner + sharedPreferences.getString("KlasseSetting", "0") + "\n");
+                            datehelper = datehelper / 5;
+                            bw.write(countId + trenner + datehelper + trenner + helper + trenner + sharedPreferences.getString("KlasseSetting", "0") + "\n");
                             count = 0;
+                            datehelper = 0;
                             countId++;
                         }
                         helper += s.getMAG();
                         count++;
+                        datehelper += s.getDate();
                     }
 
+                    SharedPreferences.Editor editor = sharedPreferences.edit();
+                    editor.putString("countId", countId + "");
+                    editor.apply();
                     bw.close();
 
                 }catch (IOException e) {
