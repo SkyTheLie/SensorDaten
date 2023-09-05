@@ -234,8 +234,11 @@ public class GraphFragment extends Fragment {
                     //FileWriter fw = new FileWriter("/storage/emulated/Download" + file);
                     BufferedWriter bw = new BufferedWriter(fw);
 
+                    SharedPreferences.Editor editor = sharedPreferences.edit();
                     if(fileIsnew){
-                        bw.write("id" + trenner + "date" + trenner + "gMag" + trenner + "klasenType");
+                        editor.putString("countId", 0 + "");
+                        editor.apply();
+                        bw.write("id" + trenner + "date" + trenner + "aMag" + trenner + "klasenType\n");
                     }
 
                     sharedPreferences = getContext().getSharedPreferences("SettingsHealthApp", Context.MODE_PRIVATE);
@@ -259,7 +262,6 @@ public class GraphFragment extends Fragment {
                         datehelper += s.getDate();
                     }
 
-                    SharedPreferences.Editor editor = sharedPreferences.edit();
                     editor.putString("countId", countId + "");
                     editor.apply();
                     bw.close();
@@ -328,21 +330,7 @@ public class GraphFragment extends Fragment {
             @Override
             public void onSensorChanged(SensorEvent event) {
 
-                String klasstype = "";
-                switch (settingsKlass.getKlassenType()){
-                    case 0:{
-                        klasstype = "U";
-                    }break;
-                    case 1:{
-                        klasstype = "S";
-                    }break;
-                    case 2:{
-                        klasstype = "L";
-                    }break;
-                    case 3:{
-                        klasstype = "R";
-                    }break;
-                }
+                String klasstype = sharedPreferences.getString("KlasseSetting", "0");
 
                 switch (event.sensor.getType()){
                     case Sensor.TYPE_ACCELEROMETER:{
