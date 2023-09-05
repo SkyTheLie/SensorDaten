@@ -244,7 +244,7 @@ public class GraphFragment extends Fragment {
                     int countId = Integer.parseInt(sharedPreferences.getString("countId", "0"));
 
                     float helper = 0;
-                    for(SensorNode s: gList){
+                    for(SensorNode s: aList){
                         if (count == 5){
                             helper = helper / 5;
                             datehelper = datehelper / 5;
@@ -327,21 +327,7 @@ public class GraphFragment extends Fragment {
             @Override
             public void onSensorChanged(SensorEvent event) {
 
-                String klasstype = "";
-                switch (settingsKlass.getKlassenType()){
-                    case 0:{
-                        klasstype = "U";
-                    }break;
-                    case 1:{
-                        klasstype = "S";
-                    }break;
-                    case 2:{
-                        klasstype = "L";
-                    }break;
-                    case 3:{
-                        klasstype = "R";
-                    }break;
-                }
+                String klasstype = sharedPreferences.getString("KlasseSetting", "0");
 
                 switch (event.sensor.getType()){
                     case Sensor.TYPE_ACCELEROMETER:{
