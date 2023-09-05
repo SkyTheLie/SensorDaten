@@ -2,6 +2,7 @@ package com.example.sensordaten;
 
 import static android.content.Context.SENSOR_SERVICE;
 
+import android.app.Service;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.graphics.Color;
@@ -110,7 +111,7 @@ public class GraphFragment extends Fragment {
                 //pathdownload = new File(pathdownload, "SubDir");
                 //pathdownload.mkdir();
 
-                Log.d("debug",pathdownload.toString() );
+                //Log.d("debug",pathdownload.toString() );
 
                 String trenner = ",";
                 String klasstype = "";
@@ -244,7 +245,7 @@ public class GraphFragment extends Fragment {
                     int countId = Integer.parseInt(sharedPreferences.getString("countId", "0"));
 
                     float helper = 0;
-                    for(SensorNode s: gList){
+                    for(SensorNode s: aList){
                         if (count == 5){
                             helper = helper / 5;
                             datehelper = datehelper / 5;
