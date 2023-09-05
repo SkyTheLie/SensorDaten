@@ -233,8 +233,11 @@ public class GraphFragment extends Fragment {
                     //FileWriter fw = new FileWriter("/storage/emulated/Download" + file);
                     BufferedWriter bw = new BufferedWriter(fw);
 
+                    SharedPreferences.Editor editor = sharedPreferences.edit();
                     if(fileIsnew){
-                        bw.write("id" + trenner + "date" + trenner + "gMag" + trenner + "klasenType");
+                        editor.putString("countId", 0 + "");
+                        editor.apply();
+                        bw.write("id" + trenner + "date" + trenner + "aMag" + trenner + "klasenType\n");
                     }
 
                     sharedPreferences = getContext().getSharedPreferences("SettingsHealthApp", Context.MODE_PRIVATE);
@@ -258,7 +261,6 @@ public class GraphFragment extends Fragment {
                         datehelper += s.getDate();
                     }
 
-                    SharedPreferences.Editor editor = sharedPreferences.edit();
                     editor.putString("countId", countId + "");
                     editor.apply();
                     bw.close();
