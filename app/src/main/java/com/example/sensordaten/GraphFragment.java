@@ -101,14 +101,14 @@ public class GraphFragment extends Fragment {
     LineGraphSeries<DataPoint> xyWertGX;
     LineGraphSeries<DataPoint> xyWertGY;
     LineGraphSeries<DataPoint> xyWertGZ;
-
+    SensorCollector myForegroundService;
     Intent serviceIntent;
     private SensorCollector.LocalBinder binder;
     private ServiceConnection serviceConnection = new ServiceConnection() {
         @Override
         public void onServiceConnected(ComponentName name, IBinder service) {
             binder = (SensorCollector.LocalBinder) service;
-            SensorCollector myForegroundService = binder.getService();
+            myForegroundService = binder.getService();
             gList = myForegroundService.getgList();
             aList = myForegroundService.getaList();
             //Log.d("debug", myForegroundService.getgList().size() + "awdsad sadas asda...................");
@@ -169,7 +169,13 @@ public class GraphFragment extends Fragment {
         tvMaxG = view.findViewById(R.id.textView21);
         tvDsG = view.findViewById(R.id.textView23);
 
-
+        btSave = view.findViewById(R.id.btSave);
+        btSave.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                myForegroundService.safeIntoFiles();
+            }
+        });
 
         sswitch = view.findViewById(R.id.swSensor);
         sswitch.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
