@@ -2,19 +2,29 @@ package com.example.sensordaten;
 
 import static android.content.Context.SENSOR_SERVICE;
 
+import android.app.Notification;
+import android.app.NotificationChannel;
+import android.app.NotificationManager;
 import android.app.Service;
+import android.content.ComponentName;
 import android.content.Context;
+import android.content.Intent;
+import android.content.ServiceConnection;
 import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
+import android.os.Build;
 import android.os.Bundle;
 
+import androidx.core.app.NotificationCompat;
 import androidx.fragment.app.Fragment;
 
 import android.os.Environment;
+import android.os.Handler;
+import android.os.IBinder;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -47,6 +57,7 @@ public class GraphFragment extends Fragment {
     //String currentDateandTime;
     SensorManager sensorManager;
     SensorEventListener sensorEventListener;
+    SensorCollector sensorCollectorc;
     Switch sswitch;
     TextView tvXG;
     TextView tvYG;
@@ -69,9 +80,9 @@ public class GraphFragment extends Fragment {
     Button btSave;
 
     LinkedList<SensorNode> gList;
-    float gD;
+    int countGList = 0;
     LinkedList<SensorNode> aList;
-    float aD;
+    int countAList = 0;
 
     LinkedList<Float> gListAvg;
     int countGListAvg = 0;
@@ -79,6 +90,8 @@ public class GraphFragment extends Fragment {
 
     GraphView graphA;
     GraphView graphG;
+
+    Handler handler;
 
     LineGraphSeries<DataPoint> xyWertA;
     LineGraphSeries<DataPoint> xyWertAX;
@@ -89,188 +102,36 @@ public class GraphFragment extends Fragment {
     LineGraphSeries<DataPoint> xyWertGY;
     LineGraphSeries<DataPoint> xyWertGZ;
 
+    Intent serviceIntent;
+    private SensorCollector.LocalBinder binder;
+    private ServiceConnection serviceConnection = new ServiceConnection() {
+        @Override
+        public void onServiceConnected(ComponentName name, IBinder service) {
+            binder = (SensorCollector.LocalBinder) service;
+            SensorCollector myForegroundService = binder.getService();
+            gList = myForegroundService.getgList();
+            aList = myForegroundService.getaList();
+            //Log.d("debug", myForegroundService.getgList().size() + "awdsad sadas asda...................");
+
+            // Hier kannst du mit der LinkedList arbeiten
+        }
+
+        @Override
+        public void onServiceDisconnected(ComponentName name) {
+            binder = null;
+        }
+    };
 
     @Override
     public void onViewCreated(View view, Bundle savedInstanceState){
         super.onViewCreated(view, savedInstanceState);
 
+
         settingsKlass = SettingsKlass.getInstance();
         sharedPreferences = getContext().getSharedPreferences("SettingsHealthApp", Context.MODE_PRIVATE);
 
+        //sensorCollectorc = new SensorCollector();
 
-        btSave = view.findViewById(R.id.btSave);
-        btSave.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-
-               // SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd:HH-mm-ss-SSS", Locale.getDefault());
-               // String currentDateandTime = sdf.format(new Date());
-                //pfadDownload = (requireContext().getExternalFilesDir(Environment.DIRECTORY_DOWNLOADS)).getPath();
-                //pfadDownload = (Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS)).getPath();
-                File pathdownload = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS);
-                //pathdownload = new File(pathdownload, "SubDir");
-                //pathdownload.mkdir();
-
-                //Log.d("debug",pathdownload.toString() );
-
-                String trenner = ",";
-                String klasstype = "";
-                switch (settingsKlass.getKlassenType()){
-                    case 0:{
-                        klasstype = "U";
-                    }break;
-                    case 1:{
-                        klasstype = "S";
-                    }break;
-                    case 2:{
-                        klasstype = "L";
-                    }break;
-                    case 3:{
-                        klasstype = "R";
-                    }break;
-                }
-
-                try {
-                    boolean fileIsnew = false;
-                    //pfadDownload = (requireContext().getExternalFilesDir(Environment.DIRECTORY_DOWNLOADS)).getPath();
-                    //Log.d("debug",pfadDownload);
-
-
-                    //File file = new File(pfadDownload +"CA_Daten_Acc_CSV" +".csv");
-                    File file = new File(pathdownload, "CA_Daten_Acc_CSV" +".txt");
-
-                    if (!file.exists()) {
-                        file.createNewFile();
-                        fileIsnew = true;
-                    }
-
-                    FileWriter fw = new FileWriter(file.getPath(), true);
-                    //FileWriter fw = new FileWriter("/storage/emulated/Download" + file);
-                    BufferedWriter bw = new BufferedWriter(fw);
-                    if(fileIsnew){
-                       // bw.write("x;y;z;yyyy-MM-dd:HH-mm-ss-SSS\n");
-                        //bw.write("x;y;z;yyyy-MM-dd:HH:mm:ss\n");
-                        bw.write("id" + trenner + "x" + trenner + "y" + trenner + "z" + trenner + "mag" + trenner + "klasstype" +"\n");
-                    }
-                    for (SensorNode n: aList) {
-                        bw.write(n.getDate() + trenner + n.getData(trenner) + trenner + n.getMAG() + trenner + n.getKlassenType() +"\n");
-                    }
-                    bw.close();
-
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-
-                try {
-                    boolean fileIsnew = false;
-                    //File file = new File(pfadDownload+"CA_Daten_Gyro_CSV" +".csv");
-                    File file = new File(pathdownload, "CA_Daten_Gyro_CSV" +".txt");
-
-                    if (!file.exists()) {
-                        file.createNewFile();
-                        fileIsnew = true;
-                    }
-
-                    FileWriter fw = new FileWriter(file.getPath(), true);
-                    //FileWriter fw = new FileWriter(file.getAbsoluteFile(), true);
-
-                    BufferedWriter bw = new BufferedWriter(fw);
-
-                    if(fileIsnew){
-                       // bw.write("x;y;z;yyyy-MM-dd:HH-mm-ss-SSS\n");
-                        //bw.write("x;y;z;yyyy-MM-dd:HH:mm:ss\n");
-                        bw.write("id" + trenner + "x" + trenner + "y" + trenner + "z" + trenner + "mag" + trenner + "klasstype" +"\n");
-                    }
-                    for (SensorNode n: gList) {
-                        bw.write(n.getDate() + trenner + n.getData(trenner) + trenner + n.getMAG() + trenner + n.getKlassenType() +"\n");
-                    }
-                    bw.close();
-                    //gList.clear();
-
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-
-                try {
-                    boolean fileIsnew = false;
-                    //pfadDownload = (requireContext().getExternalFilesDir(Environment.DIRECTORY_DOWNLOADS)).getPath();
-                    //Log.d("debug",pfadDownload);
-
-
-                    //File file = new File(pfadDownload +"CA_Daten_Acc_CSV" +".csv");
-                    File file = new File(pathdownload, "CA_Daten_Acc+gyro_CSV" +".txt");
-
-                    if (!file.exists()) {
-                        file.createNewFile();
-                        fileIsnew = true;
-                    }
-
-                    FileWriter fw = new FileWriter(file.getPath(), true);
-                    //FileWriter fw = new FileWriter("/storage/emulated/Download" + file);
-                    BufferedWriter bw = new BufferedWriter(fw);
-                    if(fileIsnew){
-                        bw.write("id" + trenner + "xa" + trenner + "ya" + trenner + "za" + trenner + "aMag" + trenner + "xg" + trenner + "yg" + trenner + "zg" + trenner + "gMag" + trenner + "klasstype" + "\n");
-                    }
-                    for(int i = 0; i < aList.size() && i < gList.size(); i++){
-                        //Log.d("debug",i + "   " + aList.size() + "   " + gList.size());
-                        bw.write(aList.get(i).getDate() + trenner + aList.get(i).getData(trenner) + trenner +aList.get(i).getMAG() + trenner + gList.get(i).getData(trenner) + trenner + gList.get(i).getMAG() + trenner + gList.get(i).getKlassenType() + "\n");
-                    }
-                    bw.close();
-
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-
-                try{
-                    boolean fileIsnew = false;
-                    File file = new File(pathdownload, "gMag_List" +".txt");
-
-                    if (!file.exists()) {
-                        file.createNewFile();
-                        fileIsnew = true;
-                    }
-
-                    FileWriter fw = new FileWriter(file.getPath(), true);
-                    //FileWriter fw = new FileWriter("/storage/emulated/Download" + file);
-                    BufferedWriter bw = new BufferedWriter(fw);
-
-                    SharedPreferences.Editor editor = sharedPreferences.edit();
-                    if(fileIsnew){
-                        editor.putString("countId", 0 + "");
-                        editor.apply();
-                        bw.write("id" + trenner + "date" + trenner + "aMag" + trenner + "klasenType\n");
-                    }
-
-                    sharedPreferences = getContext().getSharedPreferences("SettingsHealthApp", Context.MODE_PRIVATE);
-                    long datehelper = 0;
-
-                    int count = 0;
-                    int countId = Integer.parseInt(sharedPreferences.getString("countId", "0"));
-
-                    float helper = 0;
-                    for(SensorNode s: aList){
-                        if (count == 5){
-                            helper = helper / 5;
-                            datehelper = datehelper / 5;
-                            bw.write(countId + trenner + datehelper + trenner + helper + trenner + sharedPreferences.getString("KlasseSetting", "0") + "\n");
-                            count = 0;
-                            datehelper = 0;
-                            countId++;
-                        }
-                        helper += s.getMAG();
-                        count++;
-                        datehelper += s.getDate();
-                    }
-
-                    editor.putString("countId", countId + "");
-                    editor.apply();
-                    bw.close();
-
-                }catch (IOException e) {
-                    e.printStackTrace();
-                }
-            }
-        });
         //view = inflater.inflate(R.layout.fragment_blank, container,  false);
 
         //tvXG = findViewById(R.id.textView5);
@@ -308,150 +169,79 @@ public class GraphFragment extends Fragment {
         tvMaxG = view.findViewById(R.id.textView21);
         tvDsG = view.findViewById(R.id.textView23);
 
-        initGraph(view);
+
 
         sswitch = view.findViewById(R.id.swSensor);
         sswitch.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
                 if(isChecked){
-                    sensorManager.registerListener(sensorEventListener,sensorManager.getDefaultSensor(Sensor.TYPE_GYROSCOPE), settingsKlass.getSpeedGyro());
-                    sensorManager.registerListener(sensorEventListener,sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER), settingsKlass.getSpeedAcc());
-                    sensorManager.registerListener(sensorEventListener,sensorManager.getDefaultSensor(Sensor.TYPE_ROTATION_VECTOR), settingsKlass.getSpeedAcc());
+                    serviceIntent = new Intent(getActivity(), SensorCollector.class);
+                    getActivity().startService(serviceIntent);
+                    serviceIntent = new Intent(getActivity(), SensorCollector.class);
+                    getActivity().bindService(serviceIntent, serviceConnection, Context.BIND_AUTO_CREATE);
+
+
+                    initGraph(view);
+                    handler = new Handler();
+                    final int delayMillis = 200;
+                    handler.postDelayed(new Runnable() {
+                        @Override
+                        public void run() {
+                            updateGraphViewWithData();
+                            handler.postDelayed(this, delayMillis);
+                        }
+                    }, delayMillis);
+
                 }else{
-                    sensorManager.unregisterListener(sensorEventListener);
+                    getActivity().stopService(serviceIntent);
+                    handler.removeCallbacksAndMessages(null);
                 }
             }
         });
+    }
 
-        sensorManager = (SensorManager) getActivity().getSystemService(SENSOR_SERVICE);
 
-        sensorEventListener = new SensorEventListener() {
-            @Override
-            public void onSensorChanged(SensorEvent event) {
 
-                String klasstype = sharedPreferences.getString("KlasseSetting", "0");
-
-                switch (event.sensor.getType()){
-                    case Sensor.TYPE_ACCELEROMETER:{
-                        tvXA.setText(event.values[0] + "");
-                        tvYA.setText(event.values[1] + "");
-                        tvZA.setText(event.values[2] + "");
-
-                        //currentDateandTime = sdf.format(new Date());
-                        //aList.add(new SensorNode(event.values[0], event.values[1], event.values[2], currentDateandTime));
-                        aList.add(new SensorNode(event.values[0], event.values[1], event.values[2], System.currentTimeMillis(), klasstype));
-
-                        if(aList.size() > 1000){
-                            xyWertA.appendData(new DataPoint(aList.size(), aList.getLast().getMAG()), true, 1000);
-                            xyWertAX.appendData(new DataPoint(aList.size(), event.values[0]), true, 1000);
-                            xyWertAY.appendData(new DataPoint(aList.size(), event.values[1]), true, 1000);
-                            xyWertAZ.appendData(new DataPoint(aList.size(), event.values[2]), true, 1000);
-                        }else{
-                            xyWertAZ.appendData(new DataPoint(aList.size(), event.values[2]), false, 1000);
-                            xyWertA.appendData(new DataPoint(aList.size(), aList.getLast().getMAG()), false, 1000);
-                            xyWertAX.appendData(new DataPoint(aList.size(), event.values[0]), false, 1000);
-                            xyWertAY.appendData(new DataPoint(aList.size(), event.values[1]), false, 1000);
-                        }
-
-                        if(!aList.isEmpty()){
-                            tvMaxA.setText(getmax(aList) + "");
-                            tvMinA.setText(getmin(aList) + "");
-                            tvDsA.setText(getds(aList) + "");
-                        }
-                    }break;
-                    case Sensor.TYPE_GYROSCOPE:{
-
-                        if(settingsKlass.getSwitchRGState()){
-
-                            tvXG.setText((event.values[0]) + "");
-                            tvYG.setText((event.values[1]) + "");
-                            tvZG.setText((event.values[2]) + "");
-
-                            //currentDateandTime = sdf.format(new Date());
-                            //gList.add(new SensorNode(event.values[0], event.values[1], event.values[2], currentDateandTime));
-                            gList.add(new SensorNode(event.values[0], event.values[1], event.values[2], System.currentTimeMillis(), klasstype));
-
-                            /*
-                            avgHelper[countGListAvg] = (float) Math.sqrt((event.values[0])*(event.values[0]) + (event.values[1])*(event.values[1]) + (event.values[2])*(event.values[2]));
-                            countGListAvg++;
-
-                            if(countGListAvg == 5){
-                                float helper = 0;
-                                for (float f: avgHelper ){
-                                    helper +=f;
-                                }
-                                gListAvg.add(helper/5);
-                            }
-*/
-
-                            //xyWertG.appendData(new DataPoint(gList.size(), gList.getLast().getMAG()), false, 300);
-                            if(gList.size() > 300){
-                                xyWertG.appendData(new DataPoint(gList.size(), gList.getLast().getMAG()), true, 300);
-                                xyWertGX.appendData(new DataPoint(gList.size(), Math.rint(Math.toDegrees(event.values[0]) * 100) / 100), true, 300);
-                                xyWertGY.appendData(new DataPoint(gList.size(), Math.rint(Math.toDegrees(event.values[1]) * 100) / 100), true, 300);
-                                xyWertGZ.appendData(new DataPoint(gList.size(), Math.rint(Math.toDegrees(event.values[2]) * 100) / 100), true, 300);
-                            }else{
-                                xyWertG.appendData(new DataPoint(gList.size(), gList.getLast().getMAG()), false, 300);
-                                xyWertGX.appendData(new DataPoint(gList.size(), Math.rint(Math.toDegrees(event.values[0]) * 100) / 100), false, 300);
-                                xyWertGY.appendData(new DataPoint(gList.size(), Math.rint(Math.toDegrees(event.values[1]) * 100) / 100), false, 300);
-                                xyWertGZ.appendData(new DataPoint(gList.size(), Math.rint(Math.toDegrees(event.values[2]) * 100) / 100), false, 300);
-                            }
-
-                            if(!gList.isEmpty()){
-                                tvMaxG.setText(getmax(gList) + "");
-                                tvMinG.setText(getmin(gList) + "");
-                                tvDsG.setText(getds(gList) + "");
-                            }
-
-                        }
-
-                    }break;
-                    case Sensor.TYPE_ROTATION_VECTOR:{
-
-                        if(!settingsKlass.getSwitchRGState()){
-                            float[] rotMat = new float[16];
-                            sensorManager.getRotationMatrixFromVector(rotMat, event.values);
-
-                            float[] remap = new float[16];
-                            sensorManager.remapCoordinateSystem(rotMat,SensorManager.AXIS_X, SensorManager.AXIS_Z, remap);
-
-                            float[] out = new float[3];
-                            sensorManager.getOrientation(remap, out);
-
-                            tvXG.setText(Math.rint(Math.toDegrees(out[0]) * 100) / 100 + "");
-                            tvYG.setText(Math.rint(Math.toDegrees(out[1]) * 100) / 100 + "");
-                            tvZG.setText(Math.rint(Math.toDegrees(out[2]) * 100) / 100 + "");
-
-                            //currentDateandTime = sdf.format(new Date());
-                            //gList.add(new SensorNode((float)Math.toDegrees(out[0]), (float)Math.toDegrees(out[1]), (float)Math.toDegrees(out[2]), currentDateandTime));
-                            gList.add(new SensorNode((float)Math.toDegrees(out[0]), (float)Math.toDegrees(out[1]), (float)Math.toDegrees(out[2]), System.currentTimeMillis(), klasstype));
-
-                            if(gList.size() > 300){
-                                xyWertG.appendData(new DataPoint(gList.size(), gList.getLast().getMAG()), true, 300);
-                                xyWertGX.appendData(new DataPoint(gList.size(), Math.rint(Math.toDegrees(out[0]) * 100) / 100), true, 300);
-                                xyWertGY.appendData(new DataPoint(gList.size(), Math.rint(Math.toDegrees(out[1]) * 100) / 100), true, 300);
-                                xyWertGZ.appendData(new DataPoint(gList.size(), Math.rint(Math.toDegrees(out[2]) * 100) / 100), true, 300);
-
-                            }else{
-                                xyWertG.appendData(new DataPoint(gList.size(), gList.getLast().getMAG()), false, 300);
-                                xyWertGX.appendData(new DataPoint(gList.size(), Math.rint(Math.toDegrees(out[0]) * 100) / 100), false, 300);
-                                xyWertGY.appendData(new DataPoint(gList.size(), Math.rint(Math.toDegrees(out[1]) * 100) / 100), false, 300);
-                                xyWertGZ.appendData(new DataPoint(gList.size(), Math.rint(Math.toDegrees(out[2]) * 100) / 100), false, 300);
-
-                            }
-                        }
-
-                    }break;
+    private void updateGraphViewWithData() {
+        if(gList != null){
+            if(countGList < gList.size()){
+                for (;countGList < gList.size(); countGList++){
+                    if(gList.size() > 1000){
+                        xyWertG.appendData(new DataPoint(countGList, gList.get(countGList).getMAG()), true, 1000);
+                        xyWertGX.appendData(new DataPoint(countGList, gList.get(countGList).getX()), true, 1000);
+                        xyWertGY.appendData(new DataPoint(countGList, gList.get(countGList).getY()), true, 1000);
+                        xyWertGZ.appendData(new DataPoint(countGList, gList.get(countGList).getZ()), true, 1000);
+                    }else{
+                        xyWertG.appendData(new DataPoint(countGList, gList.get(countGList).getMAG()), false, 1000);
+                        xyWertGZ.appendData(new DataPoint(countGList, gList.get(countGList).getX()), false, 1000);
+                        xyWertGX.appendData(new DataPoint(countGList, gList.get(countGList).getY()), false, 1000);
+                        xyWertGY.appendData(new DataPoint(countGList, gList.get(countGList).getZ()), false, 1000);
+                    }
                 }
             }
+        }else{
+            Log.d("debug","Null-------------");
+        }
 
-            @Override
-            public void onAccuracyChanged(Sensor sensor, int accuracy) {
-
+        if(aList != null){
+            if(countAList < aList.size()){
+                for (;countAList < aList.size(); countAList++){
+                    if(aList.size() > 1000){
+                        xyWertA.appendData(new DataPoint(countAList, aList.get(countAList).getMAG()), true, 1000);
+                        xyWertAX.appendData(new DataPoint(countAList, aList.get(countAList).getX()), true, 1000);
+                        xyWertAY.appendData(new DataPoint(countAList, aList.get(countAList).getY()), true, 1000);
+                        xyWertAZ.appendData(new DataPoint(countAList, aList.get(countAList).getZ()), true, 1000);
+                    }else{
+                        xyWertA.appendData(new DataPoint(countAList, aList.get(countAList).getMAG()), false, 1000);
+                        xyWertAZ.appendData(new DataPoint(countAList, aList.get(countAList).getX()), false, 1000);
+                        xyWertAX.appendData(new DataPoint(countAList, aList.get(countAList).getY()), false, 1000);
+                        xyWertAY.appendData(new DataPoint(countAList, aList.get(countAList).getZ()), false, 1000);
+                    }
+                }
             }
+        }
 
-        };
     }
 
     @Override
@@ -461,13 +251,13 @@ public class GraphFragment extends Fragment {
     }
 
     private void initGraph(View view) {
-        aList = new LinkedList<SensorNode>();
-        gList = new LinkedList<SensorNode>();
+        //aList = sensorCollectorc.getaList();
+        //gList = sensorCollectorc.getgList();
 
         graphA = view.findViewById(R.id.graphViewA);
         //graphA.getViewport().setYAxisBoundsManual(true);
         graphA.getViewport().setXAxisBoundsManual(true);
-        graphA.getViewport().setMaxY(100);
+        graphA.getViewport().setMaxY(0);
         //graphA.getViewport().setMinY(-300);
         graphA.getViewport().setMinY(0);
         graphA.getViewport().setMaxY(0);
@@ -489,14 +279,12 @@ public class GraphFragment extends Fragment {
         xyWertAZ.setColor(Color.RED);
 
 
-
-
         graphG = view.findViewById(R.id.graphViewG);
-        graphG.getViewport().setYAxisBoundsManual(false);
+        //graphG.getViewport().setYAxisBoundsManual(false);
         graphG.getViewport().setXAxisBoundsManual(true);
-        graphG.getViewport().setMaxY(300);
-        graphG.getViewport().setMinY(-300);
-        graphG.getViewport().setMaxX(300);
+        graphG.getViewport().setMaxY(0);
+        graphG.getViewport().setMinY(0);
+        graphG.getViewport().setMaxX(1000);
         graphG.getViewport().setMinX(0);
 
         xyWertG = new LineGraphSeries<DataPoint>();
