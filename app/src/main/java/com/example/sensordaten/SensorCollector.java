@@ -114,6 +114,7 @@ public class SensorCollector extends Service {
     @Override
     public void onDestroy() {
         super.onDestroy();
+        sensorManagerStop();
         stopSelf();
         sensorManager.unregisterListener(sensorEventListener);
         // Unregister sensor listener and clean up here
