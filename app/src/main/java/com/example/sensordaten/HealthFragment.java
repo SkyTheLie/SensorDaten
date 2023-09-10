@@ -2,18 +2,26 @@ package com.example.sensordaten;
 
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.os.Build;
 import android.os.Bundle;
 
 import androidx.fragment.app.Fragment;
 
+import android.os.Handler;
 import android.text.Editable;
 import android.text.TextWatcher;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
+
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.Calendar;
+import java.util.Locale;
 
 public class HealthFragment extends Fragment {
 
@@ -23,13 +31,34 @@ public class HealthFragment extends Fragment {
     EditText edStepCount;
     EditText edWishStep;
     Button btSave;
+    Handler handler;
 
     SharedPreferences sharedPreferences;
+    String date;
+    SimpleDateFormat df = new SimpleDateFormat("dd", Locale.getDefault());
 
     public void onViewCreated(View view, Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
+        handler = new Handler();
+        final int delayMillis = 200;
 
         sharedPreferences = getContext().getSharedPreferences("SettingsHealthApp", Context.MODE_PRIVATE);
+        SharedPreferences.Editor editor = sharedPreferences.edit();
+        editor.putString("StepCounter", String.valueOf(0));
+        editor.apply();
+        date = df.format(Calendar.getInstance().getTime());
+        editor = sharedPreferences.edit();
+        editor.putInt("CurrentDate", Integer.parseInt(date));
+        editor.apply();
+
+        handler.postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                updateHeathViewWithData();
+                checkDate();
+                handler.postDelayed(this, delayMillis);
+            }
+        }, delayMillis);
 
         edGewicht = view.findViewById(R.id.edGewicht);
         edGroeße = view.findViewById(R.id.edGroeße);
@@ -42,9 +71,6 @@ public class HealthFragment extends Fragment {
 
         gespeicherteDaten = sharedPreferences.getString("gewicht", "");
         edGewicht.setText(gespeicherteDaten);
-
-        gespeicherteDaten = sharedPreferences.getString("StepCounter", "");
-        edStepCount.setText(gespeicherteDaten);
 
         gespeicherteDaten = sharedPreferences.getString("WishSteps", "");
         edWishStep.setText(gespeicherteDaten);
@@ -69,6 +95,29 @@ public class HealthFragment extends Fragment {
 */
 
 
+    }
+
+    private void checkDate() {
+        int toCheck = sharedPreferences.getInt("CurrentDate",32);
+        if (toCheck == 32) {
+            ;
+        } else {
+            if (toCheck != Integer.parseInt(df.format(Calendar.getInstance().getTime()))) {
+                SharedPreferences.Editor editor = sharedPreferences.edit();
+                editor.putInt("CurrentDate", Integer.parseInt(df.format(Calendar.getInstance().getTime())));
+                editor.apply();
+                Log.d("Day", String.valueOf(sharedPreferences.getInt("CurrentDate",32)));
+                editor = sharedPreferences.edit();
+                editor.putString("StepCounter", "0");
+                editor.apply();
+            }
+
+        }
+    }
+
+    private void updateHeathViewWithData() {
+        String gespeicherteDaten = sharedPreferences.getString("StepCounter", "");
+        edStepCount.setText(gespeicherteDaten);
     }
 
     private TextWatcher textwatchGewicht = new TextWatcher() {

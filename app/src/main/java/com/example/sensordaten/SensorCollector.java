@@ -15,6 +15,7 @@ import android.hardware.SensorManager;
 import android.os.Binder;
 import android.os.Build;
 import android.os.Environment;
+import android.os.Handler;
 import android.os.IBinder;
 import android.util.Log;
 
@@ -25,6 +26,8 @@ import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.LinkedList;
 
 public class SensorCollector extends Service {
@@ -32,6 +35,9 @@ public class SensorCollector extends Service {
     File pathdownload;
     SettingsKlass settingsKlass = SettingsKlass.getInstance();
     SharedPreferences sharedPreferences;
+    int need2 = 0;
+    int steps;
+
 
     SensorManager sensorManager;
     SensorEventListener sensorEventListener ;
@@ -61,6 +67,17 @@ public class SensorCollector extends Service {
     @Override
     public void onCreate() {
         super.onCreate();
+        sharedPreferences = getSharedPreferences("SettingsHealthApp",Context.MODE_PRIVATE);
+        Handler handler;
+        handler = new Handler();
+        final int delayMillis = 100;
+        handler.postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                updateSteps();
+                handler.postDelayed(this, delayMillis);
+            }
+        }, delayMillis);
         sensorEventListener = new SensorEventListener() {
             @Override
             public void onSensorChanged(SensorEvent event) {
@@ -109,6 +126,22 @@ public class SensorCollector extends Service {
         }
 
         // Initialize your service here
+    }
+
+    private void updateSteps() {
+        if(aList.getLast().getMAG() > 11.8){
+            if (need2 == 1){
+                need2 = 0;
+                steps = Integer.parseInt(sharedPreferences.getString("StepCounter","0"));
+                steps++;
+                Log.d("Steps",String.valueOf(steps));
+                SharedPreferences.Editor editor = sharedPreferences.edit();
+                editor.putString("StepCounter", String.valueOf(steps++));
+                editor.apply();
+            } else {
+                need2 = 1;
+            }
+        }
     }
 
     @Override

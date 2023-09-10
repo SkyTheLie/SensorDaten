@@ -189,7 +189,7 @@ public class GraphFragment extends Fragment {
 
 
                     initGraph(view);
-                    handler = new Handler();
+                    handler = new Handler(); //Das Machen
                     final int delayMillis = 200;
                     handler.postDelayed(new Runnable() {
                         @Override
