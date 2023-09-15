@@ -50,9 +50,7 @@ public class HealthFragment extends Fragment {
         final int delayMillis = 200;
 
         sharedPreferences = getContext().getSharedPreferences("SettingsHealthApp", Context.MODE_PRIVATE);
-        SharedPreferences.Editor editor = sharedPreferences.edit();
-        editor.putString("StepCounter", String.valueOf(0));
-        editor.apply();
+        SharedPreferences.Editor editor;
         date = df.format(Calendar.getInstance().getTime());
         editor = sharedPreferences.edit();
         editor.putInt("CurrentDate", Integer.parseInt(date));
