@@ -14,11 +14,15 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.Spinner;
 import android.widget.TextView;
 
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.Calendar;
 import java.util.Locale;
@@ -27,7 +31,8 @@ public class HealthFragment extends Fragment {
 
     EditText edGroeße;
     EditText edGewicht;
-
+    EditText edAlter;
+    EditText edBurnedKalorien;
     EditText edStepCount;
     EditText edWishStep;
     Button btSave;
@@ -35,6 +40,8 @@ public class HealthFragment extends Fragment {
 
     SharedPreferences sharedPreferences;
     String date;
+    int selectGeschlecht;
+    Spinner spGeschlecht;
     SimpleDateFormat df = new SimpleDateFormat("dd", Locale.getDefault());
 
     public void onViewCreated(View view, Bundle savedInstanceState) {
@@ -56,6 +63,7 @@ public class HealthFragment extends Fragment {
             public void run() {
                 updateHeathViewWithData();
                 checkDate();
+                updateKalorien();
                 handler.postDelayed(this, delayMillis);
             }
         }, delayMillis);
@@ -64,10 +72,49 @@ public class HealthFragment extends Fragment {
         edGroeße = view.findViewById(R.id.edGroeße);
         edStepCount = view.findViewById(R.id.edStepCount);
         edWishStep = view.findViewById(R.id.edWishSteps);
+        edAlter = view.findViewById(R.id.edAlter);
+        edBurnedKalorien = view.findViewById(R.id.edBurnedKalorien);
+
+        spGeschlecht = view.findViewById(R.id.spGeschlecht);
+        ArrayList<String> items = new ArrayList<>();
+        items.add("Männlich");
+        items.add("Weiblich");
+
+        ArrayAdapter<String> adapter = new ArrayAdapter<String>(view.getContext(), android.R.layout.simple_spinner_item, items);
+        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        spGeschlecht.setAdapter(adapter);
+
+        if(sharedPreferences.getString("geschlecht", "0").equals("Männlich")){
+            spGeschlecht.setSelection(0);
+        }else if (sharedPreferences.getString("geschlecht", "0").equals("Weiblich")){
+            spGeschlecht.setSelection(1);
+        }
+
+
+        spGeschlecht.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                SharedPreferences.Editor editor = sharedPreferences.edit();
+                if(position == 0){
+                    editor.putString("geschlecht", "Männlich");
+                }else{
+                    editor.putString("geschlecht", "Weiblich");
+                }
+                editor.apply();
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) {
+
+            }
+        });
 
 
         String gespeicherteDaten = sharedPreferences.getString("greoße", "");
         edGroeße.setText(gespeicherteDaten);
+
+        gespeicherteDaten = sharedPreferences.getString("alter", "");
+        edAlter.setText(gespeicherteDaten);
 
         gespeicherteDaten = sharedPreferences.getString("gewicht", "");
         edGewicht.setText(gespeicherteDaten);
@@ -79,21 +126,39 @@ public class HealthFragment extends Fragment {
         edGewicht.addTextChangedListener(textwatchGewicht);
         edStepCount.addTextChangedListener(textwatchStepCounter);
         edWishStep.addTextChangedListener(textwatchWishSteps);
+        edAlter.addTextChangedListener(textwatchAlter);
 
-/*
-        btSave = view.findViewById(R.id.safeData);
-        btSave.setOnClickListener(new View.OnClickListener() {
+    }
 
-            @Override
-            public void onClick(View v) {
-                SharedPreferences.Editor editor = sharedPreferences.edit();
-                editor.putString("greoße", edGroeße.getText().toString());
-                editor.putString("gewicht", edGewicht.getText().toString());
-                editor.apply();
+    private void updateKalorien() {
+        float schritte;
+        float größe;
+        float alter;
+        float gewicht;
+        float BMR;
+        float schrittreichweite;
+
+
+        if(edStepCount.getText().length() != 0 && edGroeße.getText().length() != 0 && edAlter.getText().length() != 0 && edGewicht.getText().length() != 0){
+            schritte = Float.parseFloat(String.valueOf(edStepCount.getText()));
+            größe = Float.parseFloat(String.valueOf(edGroeße.getText()));
+            alter = Float.parseFloat(String.valueOf(edAlter.getText()));
+            gewicht = Float.parseFloat(String.valueOf(edGewicht.getText()));
+
+            if(spGeschlecht.getSelectedItemPosition() == 0){
+                BMR = (10 * gewicht) + (6.25f * größe) - (5 * alter) + 5;
+            }else{
+                BMR = (10 * gewicht) + (6.25f * größe) - (5 * alter)  - 161;
             }
-        });
-*/
+           // float kcal = ((BMR / 24) * (3.9f / 60) * gewicht) / schritte;
 
+            schrittreichweite = (größe / 100) * 0.5f;
+
+            float kcal = (schrittreichweite / 1000f) * schritte * gewicht * 0.9f;
+            edBurnedKalorien.setText(kcal + "");
+
+            //1648,75
+        }
 
     }
 
@@ -192,6 +257,25 @@ public class HealthFragment extends Fragment {
         @Override
         public void afterTextChanged(Editable s) {
             safeSettings("WishSteps", s.toString());
+
+        }
+    };
+
+    private TextWatcher textwatchAlter = new TextWatcher() {
+
+        @Override
+        public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+
+        }
+
+        @Override
+        public void onTextChanged(CharSequence s, int start, int before, int count) {
+
+        }
+
+        @Override
+        public void afterTextChanged(Editable s) {
+            safeSettings("alter", s.toString());
 
         }
     };
